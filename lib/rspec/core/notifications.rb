@@ -7,7 +7,7 @@ module RSpec::Core
 
     # @private
     class NullColorizer
-      def wrap(line)
+      def wrap(line, ignored)
         line
       end
     end
