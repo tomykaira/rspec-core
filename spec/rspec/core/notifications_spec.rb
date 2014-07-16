@@ -2,6 +2,8 @@ require 'spec_helper'
 require 'rspec/core/notifications'
 
 RSpec.describe "FailedExampleNotification" do
+  let(:notification) { ::RSpec::Core::Notifications::FailedExampleNotification.new(example) }
+
   # ported from `base_formatter_spec` should be refactored by final
   describe "#read_failed_line" do
     let(:example) do
@@ -9,7 +11,6 @@ RSpec.describe "FailedExampleNotification" do
                      :file_path => __FILE__,
                      :execution_result => double(:exception => exception))
     end
-    let(:notification) { ::RSpec::Core::Notifications::FailedExampleNotification.new(example) }
 
     context "when backtrace is a heterogeneous language stack trace" do
       let(:exception) do
@@ -64,6 +65,21 @@ RSpec.describe "FailedExampleNotification" do
           %Q[let(:exception) { instance_double(Exception, :backtrace => [ "\#{__FILE__}:\#{__LINE__}"]) }])
       end
 
+    end
+  end
+
+  describe '#message_lines' do
+    let(:exception) { instance_double(Exception, :backtrace => [ "#{__FILE__}:#{__LINE__}"], :message => 'Test exception') }
+    let(:example) do
+      instance_double(RSpec::Core::Example,
+                      :file_path => __FILE__,
+                      :example_group => class_double(RSpec::Core::ExampleGroup, :metadata => {}, :parent_groups => []),
+                      :execution_result => double(:exception => exception))
+    end
+    it 'should return failure_lines without color' do
+      lines = notification.message_lines
+      expect(lines[0]).to match %r{\AFailure\/Error}
+      expect(lines[1]).to match %r{\A\s*Test exception\z}
     end
   end
 end
