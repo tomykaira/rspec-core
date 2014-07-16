@@ -76,6 +76,7 @@ RSpec.describe "FailedExampleNotification" do
                       :example_group => class_double(RSpec::Core::ExampleGroup, :metadata => {}, :parent_groups => []),
                       :execution_result => double(:exception => exception))
     end
+
     it 'should return failure_lines without color' do
       lines = notification.message_lines
       expect(lines[0]).to match %r{\AFailure\/Error}
