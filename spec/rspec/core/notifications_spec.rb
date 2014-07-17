@@ -2,16 +2,16 @@ require 'spec_helper'
 require 'rspec/core/notifications'
 
 RSpec.describe "FailedExampleNotification" do
+  include FormatterSupport
+
   let(:notification) { ::RSpec::Core::Notifications::FailedExampleNotification.new(example) }
+
+  before do
+    allow(example).to receive(:file_path) { __FILE__ }
+  end
 
   # ported from `base_formatter_spec` should be refactored by final
   describe "#read_failed_line" do
-    let(:example) do
-     instance_double(RSpec::Core::Example,
-                     :file_path => __FILE__,
-                     :execution_result => double(:exception => exception))
-    end
-
     context "when backtrace is a heterogeneous language stack trace" do
       let(:exception) do
         instance_double(Exception, :backtrace => [
@@ -70,11 +70,9 @@ RSpec.describe "FailedExampleNotification" do
 
   describe '#message_lines' do
     let(:exception) { instance_double(Exception, :backtrace => [ "#{__FILE__}:#{__LINE__}"], :message => 'Test exception') }
-    let(:example) do
-      instance_double(RSpec::Core::Example,
-                      :file_path => __FILE__,
-                      :example_group => class_double(RSpec::Core::ExampleGroup, :metadata => {}, :parent_groups => []),
-                      :execution_result => double(:exception => exception))
+
+    before do
+      allow(example).to receive(:example_group) { class_double(RSpec::Core::ExampleGroup, :metadata => {}, :parent_groups => []) }
     end
 
     it 'should return failure_lines without color' do
